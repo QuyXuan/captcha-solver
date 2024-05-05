@@ -105,10 +105,8 @@ def load_model():
     return model
 
 
-def predict_captcha(model):
-    img = kimage.load_img(
-        "captcha_out.png", color_mode="grayscale", target_size=(40, 150)
-    )
+def predict_captcha(model, file_path):
+    img = kimage.load_img(file_path, color_mode="grayscale", target_size=(40, 150))
     img_array = kimage.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)  # Thêm một chiều để tạo batch
     img_array = img_array / 255.0  # Chuẩn hóa
