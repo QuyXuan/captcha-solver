@@ -1,6 +1,7 @@
 from captcha.image import ImageCaptcha
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image as kimage
+from tensorflow.keras.models import load_model
 import numpy as np
 
 CHARACTERS_FULL = [
@@ -88,11 +89,16 @@ class CleanCaptcha(ImageCaptcha):
         return image
 
 
-font_paths = [r"E:\CaptchaSolver\ARIAL.TTF"]
+font_paths = [
+    r"E:\CaptchaSolver\ARIAL.TTF"
+]  # Chuột phải vào file ARIAL.TTF -> Copy Path -> Dán vào trong r""
 
 
 def generate_captcha(captcha_text):
-    captcha = CleanCaptcha(
+    # captcha = CleanCaptcha(
+    #     width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
+    # )
+    captcha = ImageCaptcha(
         width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
     )
     data = captcha.generate(captcha_text)
@@ -108,33 +114,36 @@ def predict_captcha(model, file_path):
     return one_hot_to_label(y_pred.squeeze())
 
 
-def load_model():
-    model = tf.keras.models.Sequential(
-        [
-            tf.keras.Input(shape=(40, 150, 1)),
-            tf.keras.layers.Conv2D(64, (3, 3), activation="relu", padding="same"),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-            tf.keras.layers.Conv2D(128, (3, 3), activation="relu", padding="same"),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-            tf.keras.layers.Conv2D(256, (3, 3), activation="relu", padding="same"),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-            tf.keras.layers.Conv2D(512, (3, 3), activation="relu", padding="same"),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.MaxPooling2D(pool_size=(1, 2)),
-            tf.keras.layers.Flatten(),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Dropout(0.5),
-            #     tf.keras.layers.GlobalAveragePooling2D(),
-            tf.keras.layers.Dense(512, activation="relu"),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Dropout(0.75),
-            tf.keras.layers.Dense(len(CHARACTERS_NUMBER) * 5),
-        ]
-    )
-    model.load_weights("./captcha_solver_number_model.weights.h5")
+def load_model(use_cnn=False):
+    if use_cnn:
+        model = tf.keras.models.Sequential(
+            [
+                tf.keras.Input(shape=(40, 150, 1)),
+                tf.keras.layers.Conv2D(64, (3, 3), activation="relu", padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+                tf.keras.layers.Conv2D(128, (3, 3), activation="relu", padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+                tf.keras.layers.Conv2D(256, (3, 3), activation="relu", padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+                tf.keras.layers.Conv2D(512, (3, 3), activation="relu", padding="same"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.MaxPooling2D(pool_size=(1, 2)),
+                tf.keras.layers.Flatten(),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Dropout(0.5),
+                #     tf.keras.layers.GlobalAveragePooling2D(),
+                tf.keras.layers.Dense(512, activation="relu"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Dropout(0.75),
+                tf.keras.layers.Dense(len(CHARACTERS_NUMBER) * 5),
+            ]
+        )
+        model.load_weights("./captcha_solver_number_model.weights.h5")
+    else:
+        model = load_model("./captcha_solver_number_ocr_model.h5")
     return model
 
 
