@@ -2,6 +2,7 @@ from captcha.image import ImageCaptcha
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image as kimage
 from tensorflow.keras.models import load_model
+from tensorflow.keras import layers
 import numpy as np
 
 CHARACTERS_FULL = [
@@ -67,7 +68,7 @@ CHARACTERS_FULL = [
     "z",
 ]
 
-CHARACTERS_NUMBER = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+CHARACTERS_NUMBER = ["5", "6", "7", "2", "0", "8", "3", "4", "1", "9"]
 
 CHAR_PER_LABEL = 5
 
@@ -93,14 +94,25 @@ font_paths = [
     r"E:\CaptchaSolver\ARIAL.TTF"
 ]  # Chuột phải vào file ARIAL.TTF -> Copy Path -> Dán vào trong r""
 
+char_to_num = layers.StringLookup(
+    vocabulary=list(CHARACTERS_NUMBER), num_oov_indices=0, mask_token=None
+)
+
+num_to_char = layers.StringLookup(
+    vocabulary=char_to_num.get_vocabulary(),
+    mask_token=None,
+    num_oov_indices=0,
+    invert=True,
+)
+
 
 def generate_captcha(captcha_text):
-    # captcha = CleanCaptcha(
-    #     width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
-    # )
-    captcha = ImageCaptcha(
+    captcha = CleanCaptcha(
         width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
     )
+    # captcha = ImageCaptcha(
+    #     width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
+    # )
     data = captcha.generate(captcha_text)
     captcha.write(captcha_text, "captcha_out.png")
 
@@ -143,7 +155,9 @@ def load_model(use_cnn=False):
         )
         model.load_weights("./captcha_solver_number_model.weights.h5")
     else:
-        model = load_model("./captcha_solver_number_ocr_model.h5")
+        model = tf.keras.models.load_model(
+            "./captcha_solver_number_ocr_model.h5", compile=False
+        )
     return model
 
 
@@ -162,6 +176,21 @@ def predict_list_captcha(model, file_paths):
             }
         )
     return results
+
+
+def predict_ocr_model(model, image_path):
+    img = kimage.load_img(image_path, color_mode="grayscale", target_size=(40, 150))
+    img_array = kimage.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0)
+    img_array = tf.image.convert_image_dtype(img_array, tf.float32)
+    img_array = tf.image.resize(img_array, [40, 150])
+    img_array = tf.transpose(img_array, perm=[0, 2, 1, 3])
+    img_array /= 255.0
+
+    predicts = model.predict(img_array)[0]
+    pre_label = [np.argmax(pred) for pred in predicts]
+    pred_label = tf.strings.reduce_join(num_to_char(pre_label)).numpy().decode("utf-8")
+    return pred_label
 
 
 def one_hot_to_char(x: np.array):
