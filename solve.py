@@ -69,6 +69,44 @@ CHARACTERS_FULL = [
 ]
 
 CHARACTERS_NUMBER = ["5", "6", "7", "2", "0", "8", "3", "4", "1", "9"]
+LOWERCASE_NUMBER = [
+    "7",
+    "r",
+    "i",
+    "e",
+    "2",
+    "4",
+    "3",
+    "8",
+    "v",
+    "5",
+    "z",
+    "0",
+    "6",
+    "9",
+    "b",
+    "c",
+    "y",
+    "s",
+    "t",
+    "j",
+    "n",
+    "d",
+    "l",
+    "g",
+    "p",
+    "o",
+    "h",
+    "k",
+    "x",
+    "w",
+    "q",
+    "m",
+    "a",
+    "f",
+    "1",
+    "u",
+]
 
 CHAR_PER_LABEL = 5
 
@@ -95,7 +133,7 @@ font_paths = [
 ]  # Chuột phải vào file ARIAL.TTF -> Copy Path -> Dán vào trong r""
 
 char_to_num = layers.StringLookup(
-    vocabulary=list(CHARACTERS_NUMBER), num_oov_indices=0, mask_token=None
+    vocabulary=list(LOWERCASE_NUMBER), num_oov_indices=0, mask_token=None
 )
 
 num_to_char = layers.StringLookup(
@@ -156,7 +194,7 @@ def load_model(use_cnn=False):
         model.load_weights("./captcha_solver_number_model.weights.h5")
     else:
         model = tf.keras.models.load_model(
-            "./captcha_solver_number_ocr_model.h5", compile=False
+            "./ocr_letter_number_model_v3.h5", compile=False
         )
     return model
 
@@ -166,13 +204,20 @@ def predict_list_captcha(model, file_paths):
     for file_path in file_paths:
         img = kimage.load_img(file_path, color_mode="grayscale", target_size=(40, 150))
         img_array = kimage.img_to_array(img)
-        img_array = np.expand_dims(img_array, axis=0)
-        img_array = img_array / 255.0
-        y_pred = model.predict(img_array)
+        img_array = tf.expand_dims(img_array, 0)
+        img_array = tf.image.convert_image_dtype(img_array, tf.float32)
+        img_array = tf.image.resize(img_array, [40, 150])
+        img_array = tf.transpose(img_array, perm=[0, 2, 1, 3])
+        img_array /= 255.0
+        predicts = model.predict(img_array)[0]
+        pre_label = [np.argmax(pred) for pred in predicts]
+        pred_label = (
+            tf.strings.reduce_join(num_to_char(pre_label)).numpy().decode("utf-8")
+        )
         results.append(
             {
                 "file_path": file_path,
-                "predicted_label": one_hot_to_label(y_pred.squeeze()),
+                "predicted_label": pred_label,
             }
         )
     return results
@@ -196,18 +241,18 @@ def predict_ocr_model(model, image_path):
 def one_hot_to_char(x: np.array):
     y = np.array(x)
     y = y.squeeze()
-    assert len(y) == len(CHARACTERS_NUMBER)
+    assert len(y) == len(LOWERCASE_NUMBER)
     idx = np.argmax(y)
-    return CHARACTERS_NUMBER[idx]
+    return LOWERCASE_NUMBER[idx]
 
 
 def one_hot_to_label(x):
     y = np.array(x)
     y = y.squeeze()
     label_list = []
-    assert len(y) == len(CHARACTERS_NUMBER * CHAR_PER_LABEL)
+    assert len(y) == len(LOWERCASE_NUMBER * CHAR_PER_LABEL)
     for i in range(0, CHAR_PER_LABEL):
-        start = i * len(CHARACTERS_NUMBER)
-        end = start + len(CHARACTERS_NUMBER)
+        start = i * len(LOWERCASE_NUMBER)
+        end = start + len(LOWERCASE_NUMBER)
         label_list.append(one_hot_to_char(y[start:end]))
     return "".join(label_list)

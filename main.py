@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import filedialog, PhotoImage
-from solve import load_model, predict_list_captcha, generate_captcha, predict_captcha
+from solve import load_model, predict_list_captcha, generate_captcha, predict_ocr_model
 import os
 from PIL import Image, ImageTk
 
@@ -34,7 +34,7 @@ def generate():
 
 
 def predict(file_path):
-    captcha_text = predict_captcha(model, file_path)
+    captcha_text = predict_ocr_model(model, file_path)
     textbox_predict.delete(0, "end")
     textbox_predict.insert(0, captcha_text)
 
@@ -126,21 +126,21 @@ label_title.pack(pady=12, padx=10)
 button_upload = ctk.CTkButton(
     master=frame, text="Upload", font=("Roboto", 12), command=open_file
 )
-# button_upload.pack(pady=12, padx=10)
-button_upload.pack_forget()
+button_upload.pack(pady=12, padx=10)
+# button_upload.pack_forget()
 
-textbox_captcha = ctk.CTkEntry(
-    master=frame, placeholder_text="Enter your captcha", font=("Roboto", 12)
-)
-textbox_captcha.pack(pady=12, padx=10)
+# textbox_captcha = ctk.CTkEntry(
+#     master=frame, placeholder_text="Enter your captcha", font=("Roboto", 12)
+# )
+# textbox_captcha.pack(pady=12, padx=10)
 
-button_generate = ctk.CTkButton(
-    master=frame, text="Generate", font=("Roboto", 12), command=generate
-)
-button_generate.pack(pady=12, padx=10)
+# button_generate = ctk.CTkButton(
+#     master=frame, text="Generate", font=("Roboto", 12), command=generate
+# )
+# button_generate.pack(pady=12, padx=10)
 
-label_image = ctk.CTkLabel(master=frame, text="")
-label_image.pack(pady=12, padx=10)
+# label_image = ctk.CTkLabel(master=frame, text="")
+# label_image.pack(pady=12, padx=10)
 
 canvas = ctk.CTkCanvas(master=frame, width=900, height=300, bg="#212121")
 scrollbar = ctk.CTkScrollbar(master=canvas, command=canvas.yview)
