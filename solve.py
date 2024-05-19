@@ -5,69 +5,70 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras import layers
 import numpy as np
 
-CHARACTERS_FULL = [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
+CHARACTERS_NUMBER_FULL = [
     "Y",
-    "Z",
+    "x",
+    "8",
+    "i",
+    "C",
+    "5",
+    "n",
+    "B",
+    "P",
+    "j",
+    "7",
+    "X",
+    "g",
+    "1",
+    "U",
+    "u",
+    "z",
+    "4",
     "a",
+    "r",
+    "0",
+    "m",
+    "K",
+    "Q",
+    "k",
+    "d",
+    "T",
+    "N",
+    "s",
+    "W",
     "b",
     "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
-    "p",
-    "q",
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
+    "E",
+    "G",
+    "A",
+    "R",
+    "H",
     "w",
-    "x",
+    "3",
+    "M",
+    "f",
     "y",
-    "z",
+    "L",
+    "Z",
+    "v",
+    "D",
+    "p",
+    "V",
+    "I",
+    "t",
+    "o",
+    "e",
+    "J",
+    "9",
+    "q",
+    "6",
+    "F",
+    "S",
+    "l",
+    "h",
+    "2",
+    "O",
 ]
-
 CHARACTERS_NUMBER = ["5", "6", "7", "2", "0", "8", "3", "4", "1", "9"]
 LOWERCASE_NUMBER = [
     "7",
@@ -133,7 +134,7 @@ font_paths = [
 ]  # Chuột phải vào file ARIAL.TTF -> Copy Path -> Dán vào trong r""
 
 char_to_num = layers.StringLookup(
-    vocabulary=list(LOWERCASE_NUMBER), num_oov_indices=0, mask_token=None
+    vocabulary=list(CHARACTERS_NUMBER_FULL), num_oov_indices=0, mask_token=None
 )
 
 num_to_char = layers.StringLookup(
@@ -194,7 +195,7 @@ def load_model(use_cnn=False):
         model.load_weights("./captcha_solver_number_model.weights.h5")
     else:
         model = tf.keras.models.load_model(
-            "./ocr_letter_number_model_v3.h5", compile=False
+            "./ocr_letter_number_model_v4.h5", compile=False
         )
     return model
 
@@ -241,18 +242,18 @@ def predict_ocr_model(model, image_path):
 def one_hot_to_char(x: np.array):
     y = np.array(x)
     y = y.squeeze()
-    assert len(y) == len(LOWERCASE_NUMBER)
+    assert len(y) == len(CHARACTERS_NUMBER_FULL)
     idx = np.argmax(y)
-    return LOWERCASE_NUMBER[idx]
+    return CHARACTERS_NUMBER_FULL[idx]
 
 
 def one_hot_to_label(x):
     y = np.array(x)
     y = y.squeeze()
     label_list = []
-    assert len(y) == len(LOWERCASE_NUMBER * CHAR_PER_LABEL)
+    assert len(y) == len(CHARACTERS_NUMBER_FULL * CHAR_PER_LABEL)
     for i in range(0, CHAR_PER_LABEL):
-        start = i * len(LOWERCASE_NUMBER)
-        end = start + len(LOWERCASE_NUMBER)
+        start = i * len(CHARACTERS_NUMBER_FULL)
+        end = start + len(CHARACTERS_NUMBER_FULL)
         label_list.append(one_hot_to_char(y[start:end]))
     return "".join(label_list)
