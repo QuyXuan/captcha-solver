@@ -13,8 +13,12 @@ root = ctk.CTk()
 root.geometry("1000x700")
 root.title("Captcha Solver")
 
-global model
-model = load_model()
+global number_model
+global lowercase_letter_number_model
+global full_letter_number_model
+number_model = load_model("number")
+lowercase_letter_number_model = load_model("lowercase_letter_number")
+full_letter_number_model = load_model("full_letter_number")
 max_images_per_row = 5
 
 
@@ -34,6 +38,13 @@ def generate():
 
 
 def predict(file_path):
+    captcha_text = textbox_captcha.get()
+    if captcha_text.isnumeric():
+        model = number_model
+    elif captcha_text.isalpha() and captcha_text.islower():
+        model = lowercase_letter_number_model
+    else:
+        model = full_letter_number_model
     captcha_text = predict_ocr_model(model, file_path)
     textbox_predict.delete(0, "end")
     textbox_predict.insert(0, captcha_text)
@@ -108,7 +119,7 @@ def update_canvas_scrollregion(event):
 
 
 def handle_prediction(file_paths):
-    results = predict_list_captcha(model, file_paths)
+    results = predict_list_captcha(full_letter_number_model, file_paths)
     for result in results:
         print(
             f"File: {result['file_path']}, Predicted Label: {result['predicted_label']}"
@@ -126,21 +137,21 @@ label_title.pack(pady=12, padx=10)
 button_upload = ctk.CTkButton(
     master=frame, text="Upload", font=("Roboto", 12), command=open_file
 )
-button_upload.pack(pady=12, padx=10)
-# button_upload.pack_forget()
+# button_upload.pack(pady=12, padx=10)
+button_upload.pack_forget()
 
-# textbox_captcha = ctk.CTkEntry(
-#     master=frame, placeholder_text="Enter your captcha", font=("Roboto", 12)
-# )
-# textbox_captcha.pack(pady=12, padx=10)
+textbox_captcha = ctk.CTkEntry(
+    master=frame, placeholder_text="Enter your captcha", font=("Roboto", 12)
+)
+textbox_captcha.pack(pady=12, padx=10)
 
-# button_generate = ctk.CTkButton(
-#     master=frame, text="Generate", font=("Roboto", 12), command=generate
-# )
-# button_generate.pack(pady=12, padx=10)
+button_generate = ctk.CTkButton(
+    master=frame, text="Generate", font=("Roboto", 12), command=generate
+)
+button_generate.pack(pady=12, padx=10)
 
-# label_image = ctk.CTkLabel(master=frame, text="")
-# label_image.pack(pady=12, padx=10)
+label_image = ctk.CTkLabel(master=frame, text="")
+label_image.pack(pady=12, padx=10)
 
 canvas = ctk.CTkCanvas(master=frame, width=900, height=300, bg="#212121")
 scrollbar = ctk.CTkScrollbar(master=canvas, command=canvas.yview)

@@ -165,37 +165,16 @@ def predict_captcha(model, file_path):
     return one_hot_to_label(y_pred.squeeze())
 
 
-def load_model(use_cnn=False):
-    if use_cnn:
-        model = tf.keras.models.Sequential(
-            [
-                tf.keras.Input(shape=(40, 150, 1)),
-                tf.keras.layers.Conv2D(64, (3, 3), activation="relu", padding="same"),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-                tf.keras.layers.Conv2D(128, (3, 3), activation="relu", padding="same"),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-                tf.keras.layers.Conv2D(256, (3, 3), activation="relu", padding="same"),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-                tf.keras.layers.Conv2D(512, (3, 3), activation="relu", padding="same"),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.MaxPooling2D(pool_size=(1, 2)),
-                tf.keras.layers.Flatten(),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.Dropout(0.5),
-                #     tf.keras.layers.GlobalAveragePooling2D(),
-                tf.keras.layers.Dense(512, activation="relu"),
-                tf.keras.layers.BatchNormalization(),
-                tf.keras.layers.Dropout(0.75),
-                tf.keras.layers.Dense(len(CHARACTERS_NUMBER) * 5),
-            ]
-        )
-        model.load_weights("./captcha_solver_number_model.weights.h5")
-    else:
+def load_model(type_model):
+    if type_model == "number":
+        model = tf.keras.models.load_model("./number_model.h5", compile=False)
+    elif type_model == "lowercase_letter_number":
         model = tf.keras.models.load_model(
-            "./ocr_letter_number_model_v4.h5", compile=False
+            "./lowercase_letter_number_model.h5", compile=False
+        )
+    elif type_model == "full_letter_number":
+        model = tf.keras.models.load_model(
+            "./full_letter_number_model.h5", compile=False
         )
     return model
 
