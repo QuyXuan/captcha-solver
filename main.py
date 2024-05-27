@@ -141,9 +141,7 @@ notebook.add(frame_predict_multiple, text="Predict Multiple Files")
 notebook.add(frame_generate_and_predict, text="Generate and Predict")
 
 # Predict Multiple Files Tab
-label_title_predict = ctk.CTkLabel(
-    master=frame_predict_multiple, text="Captcha Solver", font=("Roboto", 24)
-)
+label_title_predict = ctk.CTkLabel(master=frame_predict_multiple, text="Captcha Solver", font=("Roboto", 24))
 label_title_predict.pack(pady=12, padx=10)
 
 button_upload = ctk.CTkButton(
@@ -151,9 +149,7 @@ button_upload = ctk.CTkButton(
 )
 button_upload.pack(pady=12, padx=10)
 
-canvas = ctk.CTkCanvas(
-    master=frame_predict_multiple, width=900, height=300, bg="#212121"
-)
+canvas = ctk.CTkCanvas(master=frame_predict_multiple, width=900, height=300, bg="#212121")
 scrollbar = ctk.CTkScrollbar(master=canvas, command=canvas.yview)
 canvas.configure(yscrollcommand=scrollbar.set)
 scrollbar.pack(side="right", fill="y")
@@ -163,29 +159,20 @@ flow_frame = ctk.CTkFrame(canvas, width=canvas.winfo_width(), height=200)
 flow_frame.bind("<Configure>", update_canvas_scrollregion)
 canvas.create_window((0, 0), window=flow_frame, anchor="nw")
 
-button_predict = ctk.CTkButton(
-    master=frame_predict_multiple, text="Predict", font=("Roboto", 12)
-)
+button_predict = ctk.CTkButton(master=frame_predict_multiple, text="Predict", font=("Roboto", 12))
 button_predict.pack_forget()
 
 # Generate and Predict Tab
-label_title_generate = ctk.CTkLabel(
-    master=frame_generate_and_predict, text="Captcha Solver", font=("Roboto", 24)
-)
+label_title_generate = ctk.CTkLabel(master=frame_generate_and_predict, text="Captcha Solver", font=("Roboto", 24))
 label_title_generate.pack(pady=12, padx=10)
 
 textbox_captcha = ctk.CTkEntry(
-    master=frame_generate_and_predict,
-    placeholder_text="Enter your captcha",
-    font=("Roboto", 12),
+    master=frame_generate_and_predict, placeholder_text="Enter your captcha", font=("Roboto", 12)
 )
 textbox_captcha.pack(pady=12, padx=10)
 
 button_generate = ctk.CTkButton(
-    master=frame_generate_and_predict,
-    text="Generate",
-    font=("Roboto", 12),
-    command=generate,
+    master=frame_generate_and_predict, text="Generate", font=("Roboto", 12), command=generate
 )
 button_generate.pack(pady=12, padx=10)
 
@@ -195,9 +182,7 @@ label_image.pack(pady=12, padx=10)
 textbox_predict = ctk.CTkEntry(master=frame_generate_and_predict, font=("Roboto", 12))
 textbox_predict.pack_forget()
 
-button_predict_single = ctk.CTkButton(
-    master=frame_generate_and_predict, text="Predict", font=("Roboto", 12)
-)
+button_predict_single = ctk.CTkButton(master=frame_generate_and_predict, text="Predict", font=("Roboto", 12))
 button_predict_single.pack_forget()
 
 root.mainloop()
