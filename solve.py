@@ -130,20 +130,19 @@ class CleanCaptcha(ImageCaptcha):
 
 
 font_paths = [
-    r"E:\CaptchaSolver\ARIAL.TTF"
+    r"D:\baitap\python\captcha-solver\ARIAL.TTF"
 ]  # Chuột phải vào file ARIAL.TTF -> Copy Path -> Dán vào trong r""
 
 
 def generate_captcha(captcha_text):
-    captcha = CleanCaptcha(
-        width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
-    )
-    # captcha = ImageCaptcha(
+    # captcha = CleanCaptcha(
     #     width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
     # )
+    captcha = ImageCaptcha(
+        width=140, height=50, fonts=font_paths, font_sizes=(30, 32, 34)
+    )
     data = captcha.generate(captcha_text)
     captcha.write(captcha_text, "captcha_out.png")
-
 
 def predict_captcha(model, file_path):
     img = kimage.load_img(file_path, color_mode="grayscale", target_size=(40, 150))
