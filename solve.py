@@ -133,17 +133,6 @@ font_paths = [
     r"E:\CaptchaSolver\ARIAL.TTF"
 ]  # Chuột phải vào file ARIAL.TTF -> Copy Path -> Dán vào trong r""
 
-char_to_num = layers.StringLookup(
-    vocabulary=list(CHARACTERS_NUMBER_FULL), num_oov_indices=0, mask_token=None
-)
-
-num_to_char = layers.StringLookup(
-    vocabulary=char_to_num.get_vocabulary(),
-    mask_token=None,
-    num_oov_indices=0,
-    invert=True,
-)
-
 
 def generate_captcha(captcha_text):
     captcha = CleanCaptcha(
@@ -191,6 +180,16 @@ def predict_list_captcha(model, file_paths):
         img_array /= 255.0
         predicts = model.predict(img_array)[0]
         pre_label = [np.argmax(pred) for pred in predicts]
+        char_to_num = layers.StringLookup(
+            vocabulary=list(CHARACTERS_NUMBER_FULL), num_oov_indices=0, mask_token=None
+        )
+
+        num_to_char = layers.StringLookup(
+            vocabulary=char_to_num.get_vocabulary(),
+            mask_token=None,
+            num_oov_indices=0,
+            invert=True,
+        )
         pred_label = (
             tf.strings.reduce_join(num_to_char(pre_label)).numpy().decode("utf-8")
         )
@@ -203,7 +202,7 @@ def predict_list_captcha(model, file_paths):
     return results
 
 
-def predict_ocr_model(model, image_path):
+def predict_ocr_model(model, type_model, image_path):
     img = kimage.load_img(image_path, color_mode="grayscale", target_size=(40, 150))
     img_array = kimage.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0)
@@ -214,6 +213,21 @@ def predict_ocr_model(model, image_path):
 
     predicts = model.predict(img_array)[0]
     pre_label = [np.argmax(pred) for pred in predicts]
+    char_to_num = layers.StringLookup(
+        vocabulary=list(
+            CHARACTERS_NUMBER_FULL
+            if type_model == "full_letter_number"
+            else CHARACTERS_NUMBER if type_model == "number" else LOWERCASE_NUMBER
+        ),
+        num_oov_indices=0,
+        mask_token=None,
+    )
+    num_to_char = layers.StringLookup(
+        vocabulary=char_to_num.get_vocabulary(),
+        mask_token=None,
+        num_oov_indices=0,
+        invert=True,
+    )
     pred_label = tf.strings.reduce_join(num_to_char(pre_label)).numpy().decode("utf-8")
     return pred_label
 
