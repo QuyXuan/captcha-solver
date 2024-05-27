@@ -1,10 +1,9 @@
 import customtkinter as ctk
 import tkinter as tk
-from tkinter import filedialog, PhotoImage
+from tkinter import filedialog, ttk
 from solve import load_model, predict_list_captcha, generate_captcha, predict_ocr_model
 import os
 from PIL import Image, ImageTk
-
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
@@ -57,8 +56,8 @@ def update_image(image_path):
         label_image.configure(image=photo)
         label_image.image = photo
 
-        button_predict.pack(pady=12, padx=10)
-        button_predict.configure(command=lambda: predict(image_path))
+        button_predict_single.pack(pady=12, padx=10)
+        button_predict_single.configure(command=lambda: predict(image_path))
         textbox_predict.pack(pady=12, padx=10)
 
 
@@ -127,52 +126,60 @@ def handle_prediction(file_paths):
     update_flow_panel(file_paths, results)
 
 
-frame = ctk.CTkFrame(master=root)
-frame.pack(pady=20, padx=60, fill="both", expand=True)
-frame.pack_propagate(False)
+# Create Notebook (Tab Control)
+notebook = ttk.Notebook(root)
+notebook.pack(pady=20, padx=60, fill="both", expand=True)
 
-label_title = ctk.CTkLabel(master=frame, text="Captcha Solver", font=("Roboto", 24))
-label_title.pack(pady=12, padx=10)
+# Create frames for each tab
+frame_predict_multiple = ctk.CTkFrame(master=notebook)
+frame_generate_and_predict = ctk.CTkFrame(master=notebook)
+
+notebook.add(frame_predict_multiple, text="Predict Multiple Files")
+notebook.add(frame_generate_and_predict, text="Generate and Predict")
+
+# Predict Multiple Files Tab
+label_title_predict = ctk.CTkLabel(master=frame_predict_multiple, text="Captcha Solver", font=("Roboto", 24))
+label_title_predict.pack(pady=12, padx=10)
 
 button_upload = ctk.CTkButton(
-    master=frame, text="Upload", font=("Roboto", 12), command=open_file
+    master=frame_predict_multiple, text="Upload", font=("Roboto", 12), command=open_file
 )
-# button_upload.pack(pady=12, padx=10)
-button_upload.pack_forget()
+button_upload.pack(pady=12, padx=10)
 
-textbox_captcha = ctk.CTkEntry(
-    master=frame, placeholder_text="Enter your captcha", font=("Roboto", 12)
-)
-textbox_captcha.pack(pady=12, padx=10)
-
-button_generate = ctk.CTkButton(
-    master=frame, text="Generate", font=("Roboto", 12), command=generate
-)
-button_generate.pack(pady=12, padx=10)
-
-label_image = ctk.CTkLabel(master=frame, text="")
-label_image.pack(pady=12, padx=10)
-
-canvas = ctk.CTkCanvas(master=frame, width=900, height=300, bg="#212121")
+canvas = ctk.CTkCanvas(master=frame_predict_multiple, width=900, height=300, bg="#212121")
 scrollbar = ctk.CTkScrollbar(master=canvas, command=canvas.yview)
 canvas.configure(yscrollcommand=scrollbar.set)
-canvas.pack_forget()
 scrollbar.pack(side="right", fill="y")
+canvas.pack(pady=12, padx=10, fill="both")
 
 flow_frame = ctk.CTkFrame(canvas, width=canvas.winfo_width(), height=200)
 flow_frame.bind("<Configure>", update_canvas_scrollregion)
 canvas.create_window((0, 0), window=flow_frame, anchor="nw")
 
-
-button_predict = ctk.CTkButton(master=frame, text="Predict", font=("Roboto", 12))
+button_predict = ctk.CTkButton(master=frame_predict_multiple, text="Predict", font=("Roboto", 12))
 button_predict.pack_forget()
 
-textbox_predict = ctk.CTkEntry(master=frame, font=("Roboto", 12))
+# Generate and Predict Tab
+label_title_generate = ctk.CTkLabel(master=frame_generate_and_predict, text="Captcha Solver", font=("Roboto", 24))
+label_title_generate.pack(pady=12, padx=10)
+
+textbox_captcha = ctk.CTkEntry(
+    master=frame_generate_and_predict, placeholder_text="Enter your captcha", font=("Roboto", 12)
+)
+textbox_captcha.pack(pady=12, padx=10)
+
+button_generate = ctk.CTkButton(
+    master=frame_generate_and_predict, text="Generate", font=("Roboto", 12), command=generate
+)
+button_generate.pack(pady=12, padx=10)
+
+label_image = ctk.CTkLabel(master=frame_generate_and_predict, text="")
+label_image.pack(pady=12, padx=10)
+
+textbox_predict = ctk.CTkEntry(master=frame_generate_and_predict, font=("Roboto", 12))
 textbox_predict.pack_forget()
 
-root.mainloop()
+button_predict_single = ctk.CTkButton(master=frame_generate_and_predict, text="Predict", font=("Roboto", 12))
+button_predict_single.pack_forget()
 
-# Nếu muốn chạy chức năng predict nhiều file cùng 1 lúc
-# thì MỞ COMMENT dòng 129 và COMMENT dòng 130 -> 143
-# Và ngược lại nếu như muốn sử dụng chức năng generate và predict
-# thì COMMENT dòng 129 và MỞ COMMENT dòng 130 -> 143
+root.mainloop()
